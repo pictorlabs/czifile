@@ -420,7 +420,7 @@ class CziFile(object):
             dtype = numpy.promote_types(dtype, directory_entry.dtype[-2:])
         return dtype
 
-    def asarray(self, resize=True, order=0, out=None, max_workers=None):
+    def asarray(self, resize=True, order=0, out=None, max_workers=None, pyramid_type=0):
         """Return image data from file(s) as numpy array.
 
         Parameters
@@ -449,6 +449,9 @@ class CziFile(object):
                  start=self.start, out=out):
             """Read, decode, and copy subblock data."""
             subblock = directory_entry.data_segment()
+            # only use the given pyramid level to save time
+            if directory_entry.pyramid_type != pyramid_type:
+                return
             tile = subblock.data(resize=resize, order=order)
             index = tuple(slice(i - j, i - j + k) for i, j, k in
                           zip(directory_entry.start, start, tile.shape))
